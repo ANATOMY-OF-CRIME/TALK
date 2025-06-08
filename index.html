@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Kod odpowiedzi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f9f9f9; transition: background 0.3s; }
+    .container { max-width: 450px; margin: 60px auto; padding: 2em; background: #fff; border-radius: 14px; box-shadow: 0 4px 16px #0002; text-align:center; transition: background 0.3s; }
+    .top-icon { display:block; margin:0 auto 1.2em; max-width:140px; }
+
+    /* Błędne tło */
+    body.fail-bg { background:#d32f2f; }
+    body.fail-bg .container { background:#ffebee; }
+
+    /* Input */
+    input[type="text"]{ font-size:1.6em; padding:0.3em 0.4em; width:95%; margin:0.5em 0; text-align:center; letter-spacing:0.15em; }
+    input::placeholder{ color:#bbb; font-size:0.9em; letter-spacing:0.3em; }
+
+    /* Przyciski */
+    .check-btn{ width:60px; height:60px; border-radius:50%; border:none; background:#227733; color:#fff; font-size:2em; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:background 0.2s; }
+    .check-btn:hover{ background:#1b5d29; }
+
+    #response{ margin-top:1.3em; min-height:2em; padding:0.7em 1em; border-radius:8px; display:inline-block; max-width:100%; transition:background 0.3s, color 0.3s; }
+    .good{ background:#d8f5dd; color:#227733; border:1px solid #87d39b; font-size:2em; }
+    .bad{ background:transparent; color:transparent; border:none; }
+    .neutral{ background:#f1f1f1; color:#333; border:1px solid #ccc; }
+    .fail-icon{ display:block; margin:0 auto; max-width:120px; }
+
+    #answerTable{ display:none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="assets/TALK.png" alt="Talk" class="top-icon" />
+
+    <form id="codeForm" autocomplete="off">
+      <input type="text" id="codeInput" maxlength="12" pattern="[A-Za-z0-9]*" placeholder="······" autofocus required>
+      <br>
+      <button type="submit" class="check-btn" aria-label="Sprawdź">&#10148;</button>
+    </form>
+    <div id="response"></div>
+  </div>
+
+  <table id="answerTable"><tbody>
+      <tr><td>65</td><td>Brawo! Przejdź do następnej karty!</td></tr>
+      <tr><td>207</td><td>Świetnie, kolejny etap za Tobą!</td></tr>
+      <tr><td>ABC123</td><td>Przykład literowo‑cyfrowy poprawny!</td></tr>
+      <tr><td>XYZ</td><td>Krótki kod literowy działa!</td></tr>
+  </tbody></table>
+
+  <script>
+    // Buduj mapę odpowiedzi
+    const answerMap = {};
+    document.querySelectorAll('#answerTable tbody tr').forEach(r => {
+      const [k,m] = r.querySelectorAll('td');
+      answerMap[k.textContent.trim().toUpperCase()] = m.textContent.trim();
+    });
+
+    const form = document.getElementById('codeForm');
+    const input = document.getElementById('codeInput');
+    const responseDiv = document.getElementById('response');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const ans = input.value.trim().toUpperCase();
+      responseDiv.className = '';
+      document.body.classList.remove('fail-bg');
+
+      // Walidacja
+      if(!/^[A-Za-z0-9]{1,12}$/.test(ans)){
+        responseDiv.textContent = 'Kod musi mieć 1‑12 znaków (litery lub cyfry).';
+        responseDiv.classList.add('neutral');
+      } else if(ans in answerMap){
+        responseDiv.innerHTML = `&#10148; ${answerMap[ans]}`;
+        responseDiv.classList.add('good');
+      } else {
+        document.body.classList.add('fail-bg');
+        responseDiv.innerHTML = "<img src='assets/FAIL.png' alt='Fail' class='fail-icon'/>";
+        responseDiv.classList.add('bad');
+      }
+
+      // Ukryj klawiaturę mobilną po zatwierdzeniu
+      input.blur();
+      // Wyczyść pole (ale nie ustawiaj focus ponownie — użytkownik kliknie, gdy będzie chciał wpisać)
+      input.value = '';
+    });
+  </script>
+</body>
+</html>
